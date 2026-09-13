@@ -1,0 +1,6 @@
+.env
+basic_auth.ini
+basic_auth.db
+backups/
+*.log
+__pycache__/
