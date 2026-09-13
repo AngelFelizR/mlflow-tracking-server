@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+DOMAIN="mlflow.angelfeliz.com"
+
 # 0. Ir a la raíz del proyecto, sin importar desde dónde se invoque
 cd "$(dirname "$0")/.."
 
@@ -28,17 +30,40 @@ until [ "$(docker inspect -f '{{.State.Health.Status}}' mlflow-server 2>/dev/nul
 done
 echo "✅ MLflow healthy"
 
-# 5. Copiar config de Nginx y habilitar
-sudo cp nginx/mlflow.angelfeliz.com /etc/nginx/sites-available/
-sudo ln -sf /etc/nginx/sites-available/mlflow.angelfeliz.com \
-            /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-
-# 6. Emitir certificado (solo la primera vez)
-if [ ! -d /etc/letsencrypt/live/mlflow.angelfeliz.com ]; then
+# 5. Obtener certificado SSL si no existe
+if [ ! -d "/etc/letsencrypt/live/${DOMAIN}" ]; then
+  echo "🔒 Certificado no encontrado. Configurando Nginx temporal (HTTP)..."
+  
+  # Pedir correo para Let's Encrypt
   read -rp "Email para Let's Encrypt: " LE_EMAIL
-  sudo certbot --nginx -d mlflow.angelfeliz.com \
+
+  # Crear una configuración HTTP temporal
+  cat <<EOF | sudo tee "/etc/nginx/sites-available/${DOMAIN}" > /dev/null
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN};
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+    }
+}
+EOF
+
+  sudo ln -sf "/etc/nginx/sites-available/${DOMAIN}" "/etc/nginx/sites-enabled/"
+  sudo nginx -t && sudo systemctl reload nginx
+
+  echo "📜 Solicitando certificado a Let's Encrypt..."
+  sudo certbot --nginx -d "${DOMAIN}" \
        --non-interactive --agree-tos -m "$LE_EMAIL"
 fi
 
-echo "🎉 Despliegue listo: https://mlflow.angelfeliz.com"
+# 6. Aplicar la configuración SSL final de Nginx
+echo "⚙️ Aplicando configuración SSL definitiva en Nginx..."
+sudo cp nginx/mlflow.angelfeliz.com /etc/nginx/sites-available/
+sudo ln -sf "/etc/nginx/sites-available/${DOMAIN}" /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+
+echo "🎉 Despliegue listo: https://${DOMAIN}"
