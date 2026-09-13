@@ -1,0 +1,34 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # permite ejecutarlo manualmente desde la UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -euo pipefail
+            # 1. Navegar al directorio del proyecto en la VM
+            cd ~/mlflow-tracking-server
+            # 2. Descartar cambios locales si existen y traer lo último de main
+            git fetch origin main
+            git reset --hard origin/main
+            # 3. Validar archivos de configuración requeridos
+            [ -f .env ] || { echo "❌ Falta el archivo .env en la VM"; exit 1; }
+            [ -f basic_auth.ini ] || { echo "❌ Falta el archivo basic_auth.ini en la VM"; exit 1; }
+            # 4. Asegurar permisos de ejecución en los scripts
+            chmod +x scripts/*.sh
+            # 5. Reconstruir / desplegar contenedores con la nueva configuración
+            docker compose up -d --remove-orphans
+            # 6. Estado de los servicios
+            docker compose ps
