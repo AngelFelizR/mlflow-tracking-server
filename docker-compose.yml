@@ -8,7 +8,7 @@ services:
       - sh
       - -c
       - |
-        pip install --quiet psycopg2-binary boto3 &&
+        pip install --quiet psycopg2-binary boto3 Flask-WTF &&
         mlflow server \
           --host 0.0.0.0 \
           --port 5000 \
