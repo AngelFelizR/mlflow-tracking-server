@@ -30,5 +30,8 @@ jobs:
             chmod +x scripts/*.sh
             # 5. Reconstruir / desplegar contenedores con la nueva configuración
             docker compose up -d --remove-orphans
-            # 6. Estado de los servicios
+            # 6. Recargar Nginx del sistema operativo
+            echo "🔄 Recargando Nginx del sistema..."
+            systemctl reload nginx || systemctl restart nginx
+            # 7. Estado de los servicios
             docker compose ps
