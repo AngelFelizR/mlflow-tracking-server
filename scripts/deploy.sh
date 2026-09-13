@@ -24,14 +24,14 @@ until [ "$(docker inspect -f '{{.State.Health.Status}}' mlflow-server 2>/dev/nul
   ELAPSED=$((ELAPSED + 3))
   if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
     echo "❌ MLflow no llegó a healthy en ${TIMEOUT}s"
-    docker compose logs --tail=50 mlflow
+    docker compose logs --tail=50 mlflow-server
     exit 1
   fi
 done
 echo "✅ MLflow healthy"
 
-# 5. Obtener certificado SSL si no existe
-if [ ! -d "/etc/letsencrypt/live/${DOMAIN}" ]; then
+# 5. Obtener certificado SSL (solo la primera vez si no existen los archivos .pem)
+if [ ! -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
   echo "🔒 Certificado no encontrado. Configurando Nginx temporal (HTTP)..."
   
   # Pedir correo para Let's Encrypt
