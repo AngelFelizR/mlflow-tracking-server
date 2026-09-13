@@ -96,13 +96,6 @@ loss on restart if not mounted.
 * Native MLflow basic auth — no ShinyProxy. Per-user permissions on
 experiments and registered models, no extra layers.
 
-## Pasos para reiniciar el contenedor y aplicar los cambios
-
-```bash
-docker compose up -d mlflow --force-recreate
-```
-
-
 ## Author
 
 Angel Feliz — angel.esteban.feliz@gmail.com
