@@ -16,7 +16,7 @@ graph LR
 
 ## Stack
 
-* MLflow v2.18.0
+* MLflow v3.15.2
 * PostgreSQL 16
 * SQLite (auth store, persisted)
 * Nginx + Certbot
@@ -25,7 +25,7 @@ graph LR
 ## Deploy
 
 ```bash
-cp .env.example .env                # fill with secrets (openssl rand -hex 32)
+cp .env.example .env                 # fill with secrets (openssl rand -hex 32)
 cp basic_auth.ini.example basic_auth.ini
 chmod +x scripts/*.sh
 ./scripts/deploy.sh
@@ -85,17 +85,24 @@ docker compose up -d && sleep 70 && docker compose ps
 curl -s -o /dev/null -w "%{http_code}\n" \
   -X POST [http://127.0.0.1:5000/api/2.0/mlflow/experiments/search](http://127.0.0.1:5000/api/2.0/mlflow/experiments/search) \
   -H "Content-Type: application/json" -d '{}'
-
 ```
 
 ## Design notes
 
 * MLflow bound to `127.0.0.1` — all traffic goes through Nginx with SSL.
+* MLflow 3.x enforces host validation; `--allowed-hosts "*"` is set in `docker-compose.yml` to support proxying via Nginx domain.
 * Three persistent volumes: `postgres-data`, `mlflow-artifacts`,
 `basic-auth-db`. The last one is often forgotten and causes user
 loss on restart if not mounted.
 * Native MLflow basic auth — no ShinyProxy. Per-user permissions on
 experiments and registered models, no extra layers.
+
+## Pasos para reiniciar el contenedor y aplicar los cambios
+
+```bash
+docker compose up -d mlflow --force-recreate
+```
+
 
 ## Author
 
