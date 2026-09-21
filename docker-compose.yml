@@ -13,6 +13,7 @@ services:
           --host 0.0.0.0 \
           --port 5000 \
           --allowed-hosts "*" \
+          --cors-allowed-origins "*" \
           --backend-store-uri "$$MLFLOW_BACKEND_STORE_URI" \
           --default-artifact-root /mlflow/artifacts \
           --app-name basic-auth
@@ -21,6 +22,9 @@ services:
       MLFLOW_AUTH_CONFIG_PATH: /app/basic_auth.ini
       MLFLOW_BACKEND_STORE_URI: postgresql://mlflow:${POSTGRES_PASSWORD}@postgres:5432/mlflow
       FORWARDED_ALLOW_IPS: "*"
+      MLFLOW_TRACKING_DISABLE_TELEMETRY: "true"
+      MLFLOW_SERVER_ALLOWED_ORIGINS: "https://mlflow.angelfeliz.com,*"
+      MLFLOW_SERVER_DISABLE_CROSS_ORIGIN_PROTECTION: "true"
     volumes:
       - mlflow-artifacts:/mlflow/artifacts
       - basic-auth-db:/data
