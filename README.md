@@ -1,4 +1,4 @@
-# MLflow Tracking Server — [mlflow.angelfeliz.com](mlflow.angelfeliz.com)
+# MLflow Tracking Server — [mlflow.angelfeliz.com](https://mlflow.angelfeliz.com)
 
 Production-ready MLflow Tracking Server on a single VM: persistent
 PostgreSQL backend, basic auth, Nginx reverse proxy, and SSL via
@@ -33,10 +33,10 @@ chmod +x scripts/*.sh
 ## CI/CD: Push to Auto-Deploy
 
 ```mermaid
-flowchart TD
-    A["git push origin main"] --> B["GitHub Actions - runner en la nube"]
-    B -->|SSH| C["Tu VM - git pull and docker compose up -d"]
-    C --> D["Contenedores actualizados"]
+graph TD
+    A["git push origin main"] --> B["GitHub Actions (cloud runner)"]
+    B -->|"SSH"| C["Your VM: git pull + docker compose up -d"]
+    C --> D["Updated containers"]
 ```
 
 ## Connect from Python
