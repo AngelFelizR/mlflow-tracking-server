@@ -34,8 +34,8 @@ chmod +x scripts/*.sh
 
 ```mermaid
 flowchart TD
-    A["git push origin main"] --> B["GitHub Actions<br/>runner en la nube"]
-    B -->|SSH| C["Tu VM<br/>git pull && docker compose up -d"]
+    A["git push origin main"] --> B["GitHub Actions - runner en la nube"]
+    B -->|SSH| C["Tu VM - git pull and docker compose up -d"]
     C --> D["Contenedores actualizados"]
 ```
 
@@ -101,3 +101,4 @@ docker compose up -d mlflow --force-recreate
 ## Author
 
 Angel Feliz — angel.esteban.feliz@gmail.com
+
